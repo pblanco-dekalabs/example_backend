@@ -1,7 +1,8 @@
-import { Get, JsonController, Param } from 'routing-controllers'
+import { Controller, Get, JsonController, Param } from 'routing-controllers'
 import { Inject, Service } from 'typedi'
 import { getCustomRepository } from 'typeorm'
-import PersonRepository from '../repositories/TypeOrmPersonRepository'
+import PersonRepository from '../repositories/PersonRepository'
+import PersonRepositoryInterface from '../repositories/PersonRepositoryInterface'
 import PersonService from '../services/PersonService'
 
 /**
@@ -9,15 +10,16 @@ import PersonService from '../services/PersonService'
  */
 @JsonController('/api')
 @Service()
+@Controller()
 export default class HelloController {
   @Inject()
   private readonly service!: PersonService
-  private readonly repository: PersonRepository
-
+  private readonly repository: PersonRepositoryInterface
+  
   constructor() {
     this.repository = getCustomRepository(PersonRepository)
   }
-
+  
   /**
    * Example usage of person repository.
    */
@@ -28,13 +30,13 @@ export default class HelloController {
       meta: {
         'was found?': data.isDefined(),
         mnemonic: data.isDefined()
-          ? `Some[${data.get().constructor.name}]`
-          : `None`,
+        ? `Some[${data.get().constructor.name}]`
+        : `None`,
       },
       data,
     }
   }
-
+  
   /**
    * Example route.
    */
@@ -44,7 +46,7 @@ export default class HelloController {
       hello: 'world',
     }
   }
-
+  
   /**
    * Example usage of simple ORM.
    */
