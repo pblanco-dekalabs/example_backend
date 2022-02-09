@@ -1,8 +1,8 @@
 import './InjectContainers'
 import * as Application from 'koa'
 import Entry from 'ts-entry-point'
-import { createKoaServer } from 'routing-controllers'
-import HelloController from './controllers/HelloController'
+import { createExpressServer, createKoaServer } from 'routing-controllers'
+import * as path from 'path'
 import Connection from './services/Connection'
 import Container from 'typedi'
 /**
@@ -47,8 +47,10 @@ export default class Main {
     const connectionService = Container.get(Connection)
     const connection = connectionService.connect('my-database.db')
     // Setup controllers of the application. This could be provided by an abstract provider.
-    const app: Application = createKoaServer({
-      controllers: [HelloController],
+    const app: Application = createExpressServer({
+      defaultErrorHandler: false,
+      controllers: [path.join(__dirname, '/controllers/*.ts')],
+      middlewares: [path.join(__dirname, '/middlewares/*.ts')],
     })
     return { app, connection }
   }

@@ -1,4 +1,4 @@
-import { Controller, Get, JsonController, Param } from 'routing-controllers'
+import { Controller, Get, JsonController, Param, UseAfter } from 'routing-controllers'
 import { Inject, Service } from 'typedi'
 import { getCustomRepository } from 'typeorm'
 import PersonRepository from '../repositories/PersonRepository'
@@ -42,9 +42,7 @@ export default class HelloController {
    */
   @Get('/hello')
   async hello() {
-    return {
-      hello: 'world',
-    }
+    throw new Error('No works')
   }
   
   /**
