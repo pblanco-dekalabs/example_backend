@@ -1,9 +1,8 @@
 import { Get, JsonController, Param } from 'routing-controllers'
 import { Inject, Service } from 'typedi'
 import { getCustomRepository } from 'typeorm'
-import Person from '../domain/model/Person'
-import PersonRepository from '../repositories/PersonRepository'
-import ExampleService from '../services/ExampleService'
+import PersonRepository from '../repositories/TypeOrmPersonRepository'
+import PersonService from '../services/PersonService'
 
 /**
  * Example controller.
@@ -12,7 +11,7 @@ import ExampleService from '../services/ExampleService'
 @Service()
 export default class HelloController {
   @Inject()
-  private readonly service!: ExampleService
+  private readonly service!: PersonService
   private readonly repository: PersonRepository
 
   constructor() {
@@ -24,7 +23,7 @@ export default class HelloController {
    */
   @Get('/person/:name')
   async personByName(@Param('name') name: string) {
-    const data = await this.repository.tryFind(name)
+    const data = await this.service.tryFind(this.repository, name)
     return {
       meta: {
         'was found?': data.isDefined(),
@@ -52,11 +51,7 @@ export default class HelloController {
   @Get('/persons')
   async persons() {
     return {
-      data: await Person.find(),
-      meta: {
-        '2 + 3': await this.service.sum(2, 3),
-        '"a" + "b"': await this.service.sum('a', 'b'),
-      },
+      data: await this.service.find(this.repository)
     }
   }
 }

@@ -7,7 +7,7 @@ export type Future<T> = Promise<option<T>>
 
 // Example of custom repository
 @EntityRepository(Person)
-export default class PersonRepository extends Repository<Person> {
+export default class TypeOrmPersonRepository extends Repository<Person> {
   // Simple custom method
   async tryFind(name: string): Future<Person> {
     const person = await this.findOne({ name })

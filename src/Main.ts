@@ -2,10 +2,9 @@ import './InjectContainers'
 import * as Application from 'koa'
 import Entry from 'ts-entry-point'
 import { createKoaServer } from 'routing-controllers'
-import { createConnection } from 'typeorm'
 import HelloController from './controllers/HelloController'
-import Person from './domain/model/Person'
-
+import Connection from './services/Connection'
+import Container from 'typedi'
 /**
  * Main class.
  * This class serves as implementation-specific provider for
@@ -18,16 +17,6 @@ export default class Main {
    */
   static async main(args: string[]) {
     const { app } = await this.setup()
-    // Example usage of the ORM
-    if ((await Person.count()) <= 0) {
-      const person = new Person()
-      person.name = 'John Doe'
-      person.birthDate = new Date('10/10/1995')
-      Person.save(person)
-    }
-    const n = await Person.count()
-    console.log(`Got ${n} record(s):`)
-    console.log(await Person.find())
     // Starts the server
     app.listen(this.port, this.done)
   }
@@ -55,12 +44,8 @@ export default class Main {
   // Simple DB and server setup.
   private static async setup() {
     // Create the connection, this should be read from configurable sources.
-    const connection = await createConnection({
-      type: 'sqlite',
-      database: 'my-database.db',
-      entities: [Person],
-      synchronize: true,
-    })
+    const connectionService = Container.get(Connection)
+    const connection = connectionService.connect('my-database.db')
     // Setup controllers of the application. This could be provided by an abstract provider.
     const app: Application = createKoaServer({
       controllers: [HelloController],
