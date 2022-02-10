@@ -1,7 +1,7 @@
 import './InjectContainers'
 import * as Application from 'koa'
 import Entry from 'ts-entry-point'
-import { createKoaServer } from 'routing-controllers'
+import { createKoaServer, useKoaServer } from 'routing-controllers'
 import { createConnection } from 'typeorm'
 import HelloController from './controllers/HelloController'
 import Person from './domain/model/Person'
@@ -52,6 +52,24 @@ export default class Main {
     )
   }
 
+  private static async handleErrors(
+    ctx: Application.Context,
+    next: Application.Next
+  ) {
+    try {
+      await next()
+    } catch (err) {
+      ctx.status = 500
+      ctx.body = { error: err.message, stack: err.stack }
+      return
+    }
+    if (ctx.body == null) {
+      ctx.body = {
+        error: 'Not found',
+      }
+    }
+  }
+
   // Simple DB and server setup.
   private static async setup() {
     // Create the connection, this should be read from configurable sources.
@@ -62,7 +80,10 @@ export default class Main {
       synchronize: true,
     })
     // Setup controllers of the application. This could be provided by an abstract provider.
-    const app: Application = createKoaServer({
+    // const app: Application =
+    const app = new Application()
+    app.use(this.handleErrors)
+    useKoaServer(app, {
       controllers: [HelloController],
     })
     return { app, connection }

@@ -51,6 +51,7 @@ export default class HelloController {
    */
   @Get('/persons')
   async persons() {
+    throw new Error('MUSK')
     return {
       data: await Person.find(),
       meta: {
