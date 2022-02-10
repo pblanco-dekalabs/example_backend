@@ -51,8 +51,9 @@ export default class Main {
       return
     }
     if (ctx.body == null) {
+      ctx.status = 404
       ctx.body = {
-        error: 'Not found',
+        message: 'Not found',
       }
     }
   }
