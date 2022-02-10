@@ -1,10 +1,10 @@
 import './InjectContainers'
 import * as Application from 'koa'
 import Entry from 'ts-entry-point'
-import { createExpressServer, createKoaServer } from 'routing-controllers'
-import * as path from 'path'
+import { useKoaServer } from 'routing-controllers'
 import Connection from './services/Connection'
 import Container from 'typedi'
+import { handleErrors } from './middlewares/ErrorHandler'
 /**
  * Main class.
  * This class serves as implementation-specific provider for
@@ -23,7 +23,6 @@ export default class Main {
 
   static readonly port = 3001
 
-  // Called once the setup is done.
   private static done() {
     console.log(`Listening on port ${Main.port}!`)
     console.log(`Go and test the API!`)
@@ -40,18 +39,14 @@ export default class Main {
       `Example of repository without result: http://localhost:3001/api/person/Not%20John%20Doe`
     )
   }
-
-  // Simple DB and server setup.
   private static async setup() {
-    // Create the connection, this should be read from configurable sources.
     const connectionService = Container.get(Connection)
     const connection = connectionService.connect('my-database.db')
-    // Setup controllers of the application. This could be provided by an abstract provider.
-    const app: Application = createExpressServer({
-      defaultErrorHandler: false,
-      controllers: [path.join(__dirname, '/controllers/*.ts')],
-      middlewares: [path.join(__dirname, '/middlewares/*.ts')],
+    const app = new Application()
+    useKoaServer(app, {
+      controllers: [`${__dirname}/controllers/*.ts`],
     })
+    app.use(handleErrors)
     return { app, connection }
   }
 }

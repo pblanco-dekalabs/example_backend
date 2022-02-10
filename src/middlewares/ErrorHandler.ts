@@ -1,15 +1,19 @@
-import { Middleware, ExpressErrorMiddlewareInterface, HttpCode, Req, Res } from 'routing-controllers';
-import { Service } from 'typedi';
+import * as Application from 'koa'
 
-@Service()
-@Middleware({ type: 'after' })
-export class ErrorHandler implements ExpressErrorMiddlewareInterface {
-  error(error: any, @Req() request: any, @Res() response: any, next: (err: any) => any) {
-    response.statusCode = 400
-    return response.send({
-      code: error.statusCode || 400,
-      message: error.message
-    })
-    next(error)
+export async function handleErrors(
+  ctx: Application.Context,
+  next: Application.Next
+) {
+  try {
+    await next()
+  } catch (err) {
+    ctx.status = 500
+    ctx.body = { error: err.message, stack: err.stack }
+    return
+  }
+  if (ctx.body == null) {
+    ctx.body = {
+      error: 'Not found',
+    }
   }
 }
