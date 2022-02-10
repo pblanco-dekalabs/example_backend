@@ -4,7 +4,7 @@ import Entry from 'ts-entry-point'
 import { useKoaServer } from 'routing-controllers'
 import Connection from './services/Connection'
 import Container from 'typedi'
-import { handleErrors } from './middlewares/ErrorHandler'
+import { customError } from './infrastructure/errors'
 /**
  * Main class.
  * This class serves as implementation-specific provider for
@@ -39,14 +39,32 @@ export default class Main {
       `Example of repository without result: http://localhost:3001/api/person/Not%20John%20Doe`
     )
   }
+  private static async handleErrors(
+    ctx: Application.Context,
+    next: Application.Next
+  ) {
+    try {
+      await next()
+    } catch (error) {
+      ctx.status = error.statusCode || 500
+      ctx.body = customError(error)
+      return
+    }
+    if (ctx.body == null) {
+      ctx.body = {
+        error: 'Not found',
+      }
+    }
+  }
   private static async setup() {
     const connectionService = Container.get(Connection)
     const connection = connectionService.connect('my-database.db')
     const app = new Application()
+    app.use(this.handleErrors)
     useKoaServer(app, {
+      defaultErrorHandler: false,
       controllers: [`${__dirname}/controllers/*.ts`],
     })
-    app.use(handleErrors)
     return { app, connection }
   }
 }
