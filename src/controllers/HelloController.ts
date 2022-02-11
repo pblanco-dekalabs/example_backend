@@ -5,12 +5,8 @@ import PersonRepository from '../repositories/PersonRepository'
 import PersonRepositoryInterface from '../repositories/PersonRepositoryInterface'
 import PersonService from '../services/PersonService'
 
-/**
- * Example controller.
- */
-@JsonController('/api')
 @Service()
-@Controller()
+@JsonController('/api')
 export default class HelloController {
   @Inject()
   private readonly service!: PersonService
@@ -20,9 +16,6 @@ export default class HelloController {
     this.repository = getCustomRepository(PersonRepository)
   }
   
-  /**
-   * Example usage of person repository.
-   */
   @Get('/person/:name')
   async personByName(@Param('name') name: string) {
     const data = await this.service.tryFind(this.repository, name)
@@ -37,17 +30,11 @@ export default class HelloController {
     }
   }
   
-  /**
-   * Example route.
-   */
   @Get('/hello')
   async hello() {
     throw new Error('No works')
   }
   
-  /**
-   * Example usage of simple ORM.
-   */
   @Get('/persons')
   async persons() {
     return {

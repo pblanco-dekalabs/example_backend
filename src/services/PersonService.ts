@@ -11,7 +11,4 @@ export default class PersonService {
   async find(repository: PersonRepositoryInterface): Promise<Person[]> {
     return await repository.find()
   }
-  async sum(left: any, right: any) {
-    return left + right
-  }
 }
